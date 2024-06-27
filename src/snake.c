@@ -2,7 +2,6 @@
 #include "snake_body.h"
 #include "utils.h"
 #include "shader.h"
-#include "turn_queue.h"
 
 #include <stdlib.h>
 
@@ -18,14 +17,12 @@ void snake_init(int x, int y, int dx, int dy, struct snake *snake)
     dx *= snake_step;
     dy *= snake_step;
     snake_body_init(x, y, dx, dy, &snake->head_shader, snake->head);
-    turn_queue_init(&snake->turns);
 }
 
 void snake_free(struct snake *snake)
 {
     snake_body_free(snake->head);
     snake->head = NULL;
-    turn_queue_destroy(&snake->turns);
 }
 
 static void snake_body_draw(const struct snake_body *body,

@@ -3,12 +3,10 @@
 
 #include "snake_body.h"
 #include "field.h"
-#include "turn_queue.h"
 
 struct snake {
     struct snake_body *head;
     shader_t head_shader, body_shader;
-    turn_queue_t turns;
 };
 
 enum { snake_step = snake_body_size };
