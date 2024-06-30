@@ -3,6 +3,7 @@
 #include "snake.h"
 #include "snake_body.h"
 #include "fruit.h"
+#include "turn_queue.h"
 
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
@@ -21,6 +22,7 @@ struct snake_game {
     GLFWwindow *window;
     int score, score_msg_x, score_msg_y;
     int game_over;
+    turn_queue_t turns;
 };
 
 
@@ -28,8 +30,8 @@ enum { init_win_width = 800, init_win_height = 600 };
 enum { field_width = 600, field_height = 400 };
 enum { key_escape = 27 };
 
-const double snake_init_speed = 1.5;
-const double snake_speed_grow = 0.1;
+const double snake_init_speed = 3; 
+const double snake_speed_grow = 0.2;
 
 struct snake_game *game;
 
@@ -102,16 +104,16 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action,
 
     switch (key) {
     case GLFW_KEY_UP:
-        snake_set_direction(0, -1, game->snake);
+        turn_queue_push(0, -1, &game->turns);
         break;
     case GLFW_KEY_DOWN:
-        snake_set_direction(0, 1, game->snake);
+        turn_queue_push(0, 1, &game->turns);
         break;
     case GLFW_KEY_LEFT:
-        snake_set_direction(-1, 0, game->snake);
+        turn_queue_push(-1, 0, &game->turns);
         break;
     case GLFW_KEY_RIGHT:
-        snake_set_direction(1, 0, game->snake);
+        turn_queue_push(1, 0, &game->turns);
         break;
     case GLFW_KEY_ESCAPE:
         glfwSetWindowShouldClose(window, 1);
@@ -170,6 +172,7 @@ void snake_game_init()
     game->game_over = 0;
     game->field = field_create(field_x, field_y, field_width, field_height,
                                game->win_width, game->win_height);
+    turn_queue_init(&game->turns);
     add_snake(game);
     add_fruit(game);
 }
@@ -187,6 +190,7 @@ void snake_game_free()
     free(game->snake);
     free(game->fruit);
     free(game->field);
+    turn_queue_destroy(&game->turns);
     game->snake = NULL;
     game->fruit = NULL;
     game->field = NULL;
@@ -208,6 +212,14 @@ void snake_game_start()
         now = glfwGetTime();
         snake_path = game->snake_speed * (now - game->last_move_time);
         if (snake_path >= 1.0) {
+            while (!turn_queue_empty(&game->turns)) {
+                int dx, dy;
+                turn_queue_pop(&dx, &dy, &game->turns);
+                if (is_snake_correct_direction(dx, dy, game->snake)) {
+                    snake_set_direction(dx, dy, game->snake);
+                    break;
+                }
+            }
             if (check_snake_fruit_collision(game->fruit, game->snake))
                 handle_snake_fruit_collision();
             else if (check_snake_tail_collision(game->snake))

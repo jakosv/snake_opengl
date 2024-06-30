@@ -8,7 +8,7 @@ LIBS = -L$(LIB) -lglfw3 -framework Cocoa -framework OpenGL \
 INCLUDE = -I ../include/
 
 SOURCES = glad.c snake.c snake_game.c fruit.c field.c snake_body.c shader.c \
-		  field_block.c main.c rectangle.c
+		  field_block.c main.c rectangle.c turn_queue.c
 
 OBJECTS = $(SOURCES:.c=.o)
 

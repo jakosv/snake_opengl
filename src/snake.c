@@ -2,6 +2,7 @@
 #include "snake_body.h"
 #include "utils.h"
 #include "shader.h"
+#include "turn_queue.h"
 
 #include <stdlib.h>
 
@@ -17,12 +18,14 @@ void snake_init(int x, int y, int dx, int dy, struct snake *snake)
     dx *= snake_step;
     dy *= snake_step;
     snake_body_init(x, y, dx, dy, &snake->head_shader, snake->head);
+    turn_queue_init(&snake->turns);
 }
 
 void snake_free(struct snake *snake)
 {
     snake_body_free(snake->head);
     snake->head = NULL;
+    turn_queue_destroy(&snake->turns);
 }
 
 static void snake_body_draw(const struct snake_body *body,
@@ -54,12 +57,16 @@ static void update_body_direction(int *dx, int *dy, struct snake_body *body)
     }
 }
 
-static int is_correct_direction(int dx, int dy, const struct snake *snake)
+int is_snake_correct_direction(int dx, int dy, const struct snake *snake)
 {
+    int snake_dx, snake_dy;
+    snake_dx = snake->head->dx;
+    snake_dy = snake->head->dy;
+    return snake_dx != dx && snake_dy != dy && 
+            (snake_dx * dx + snake_dy * dy) == 0;
     /*
-    return (snake->head->dx * dx + snake->head->dy * dy) == 0;
-    */
     return !is_snake_tail(snake->head->x + dx, snake->head->y + dy, snake);
+    */
 }
 
 void snake_move(struct snake *snake, const struct field *field)
@@ -104,7 +111,7 @@ void snake_set_direction(int dx, int dy, struct snake *snake)
     int snake_dx, snake_dy;
     snake_dx = dx * snake_step;
     snake_dy = dy * snake_step;
-    if (!is_correct_direction(snake_dx, snake_dy, snake))
+    if (!is_snake_correct_direction(snake_dx, snake_dy, snake))
         return;
     snake->head->dx = snake_dx;
     snake->head->dy = snake_dy;
