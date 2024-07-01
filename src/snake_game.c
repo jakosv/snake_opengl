@@ -222,11 +222,11 @@ void snake_game_start()
             }
             if (check_snake_fruit_collision(game->fruit, game->snake))
                 handle_snake_fruit_collision();
-            else if (check_snake_tail_collision(game->snake))
-                game->game_over = 1;
             else
                 snake_move(game->snake, game->field); 
 
+            if (check_snake_tail_collision(game->snake))
+                game->game_over = 1;
             game->last_move_time = now;
         }
 

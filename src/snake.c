@@ -64,9 +64,6 @@ int is_snake_correct_direction(int dx, int dy, const struct snake *snake)
     snake_dy = snake->head->dy;
     return snake_dx != dx && snake_dy != dy && 
             (snake_dx * dx + snake_dy * dy) == 0;
-    /*
-    return !is_snake_tail(snake->head->x + dx, snake->head->y + dy, snake);
-    */
 }
 
 void snake_move(struct snake *snake, const struct field *field)
@@ -92,7 +89,7 @@ void snake_eat_fruit(struct snake *snake, const struct field *field)
 int is_snake_tail(int x, int y, const struct snake *snake)
 {
     struct snake_body *tmp;
-    for (tmp = snake->head; tmp; tmp = tmp->next)
+    for (tmp = snake->head->next; tmp; tmp = tmp->next)
         if (tmp->x == x && tmp->y == y)
             return 1;
     return 0;
@@ -100,10 +97,13 @@ int is_snake_tail(int x, int y, const struct snake *snake)
 
 int check_snake_tail_collision(const struct snake *snake)
 {
+    /*
     int snake_x, snake_y;
     snake_x = snake->head->x + snake->head->dx;
     snake_y = snake->head->y + snake->head->dy;
     return is_snake_tail(snake_x, snake_y, snake);
+    */
+    return is_snake_tail(snake->head->x, snake->head->y, snake);
 }
 
 void snake_set_direction(int dx, int dy, struct snake *snake)
