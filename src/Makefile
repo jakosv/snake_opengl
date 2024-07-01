@@ -1,9 +1,19 @@
 PROG = snake_game
 CFLAGS = -Wall -g -ansi -pedantic
 
-LIB = ../lib/
-LIBS = -L$(LIB) -lglfw3 -framework Cocoa -framework OpenGL \
-	   -framework IOKit -framework QuartzCore
+#LIB = ../lib/
+#LIBS = -L$(LIB) -lglfw3
+LIBS = -lglfw3
+
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Linux)
+	LIBS += -lGL -lX11 -lpthread -lXrandr -lXi -ldl -lm
+endif
+ifeq ($(UNAME_S),Darwin)
+	LIBS += -framework Cocoa -framework OpenGL -framework IOKit \
+			-framework QuartzCore
+endif
 
 INCLUDE = -I ../include/
 
